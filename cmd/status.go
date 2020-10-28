@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 
@@ -120,17 +121,25 @@ func (s *KoolStatus) Execute(args []string) (err error) {
 		i++
 	}
 
+	green := color.New(color.Green)
+	red := color.New(color.Red)
+
 	s.table.SetWriter(s.GetWriter())
-	s.table.AppendHeader("Service", "Running", "Ports", "State")
+	s.table.AppendHeader(
+		green.Sprint("Service"),
+		green.Sprint("Running"),
+		green.Sprint("Ports"),
+		green.Sprint("State"),
+	)
 
 	sort.SliceStable(status, func(i, j int) bool {
 		return status[i].service < status[j].service
 	})
 
 	for _, st := range status {
-		running := "Not running"
+		running := red.Sprint("Not running")
 		if st.running {
-			running = "Running"
+			running = green.Sprint("Running")
 		}
 		s.table.AppendRow(st.service, running, st.ports, st.state)
 	}
