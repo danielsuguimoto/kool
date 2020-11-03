@@ -25,7 +25,7 @@ func (f *fakeReaderWriterCloser) Write(p []byte) (n int, err error) {
 
 func TestParseRedirectParseNoRedirects(t *testing.T) {
 	// test no redirects
-	p, err := parseRedirects([]string{"foo", "bar"})
+	p, err := parseRedirects(NewShell(), []string{"foo", "bar"})
 
 	if err != nil {
 		t.Errorf("unexpected error parsing redirects")
@@ -39,7 +39,7 @@ func TestParseRedirectParseNoRedirects(t *testing.T) {
 	input := filepath.Join(t.TempDir(), "input")
 	file, _ := os.Create(input)
 	file.Close()
-	p, err = parseRedirects([]string{"foo", "<", input})
+	p, err = parseRedirects(NewShell(), []string{"foo", "<", input})
 
 	if err != nil {
 		t.Errorf("unexpected error parsing redirects")
@@ -55,7 +55,7 @@ func TestParseRedirectParseNoRedirects(t *testing.T) {
 	output := filepath.Join(t.TempDir(), "output")
 	file, _ = os.Create(output)
 	file.Close()
-	p, err = parseRedirects([]string{"foo", ">", output})
+	p, err = parseRedirects(NewShell(), []string{"foo", ">", output})
 
 	if err != nil {
 		t.Errorf("unexpected error parsing redirects")

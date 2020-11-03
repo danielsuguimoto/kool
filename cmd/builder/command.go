@@ -12,6 +12,7 @@ import (
 
 // DefaultCommand holds data and logic for an executable command.
 type DefaultCommand struct {
+	shell 	shell.Shell
 	command string
 	args    []string
 }
@@ -36,21 +37,21 @@ type Command interface {
 }
 
 // NewCommand Create a new command.
-func NewCommand(command string, args ...string) *DefaultCommand {
-	return &DefaultCommand{command, args}
+func NewCommand(shell shell.Shell, command string, args ...string) *DefaultCommand {
+	return &DefaultCommand{shell, command, args}
 }
 
 // ParseCommand transforms a command line string into separated
 // command name and arguments list, expanding environment variables
 // if any.
-func ParseCommand(line string) (command *DefaultCommand, err error) {
+func ParseCommand(shell shell.Shell, line string) (command *DefaultCommand, err error) {
 	var parsed []string
 
 	if parsed, err = shlex.Split(os.ExpandEnv(line)); err != nil {
 		return
 	}
 
-	command = &DefaultCommand{parsed[0], parsed[1:]}
+	command = &DefaultCommand{shell, parsed[0], parsed[1:]}
 
 	return
 }
@@ -79,7 +80,7 @@ func (c *DefaultCommand) Interactive(args ...string) (err error) {
 		finalArgs = append(finalArgs, args...)
 	}
 
-	err = shell.Interactive(c.command, finalArgs...)
+	err = c.shell.Interactive(c.command, finalArgs...)
 	return
 }
 
@@ -91,6 +92,6 @@ func (c *DefaultCommand) Exec(args ...string) (outStr string, err error) {
 		finalArgs = append(finalArgs, args...)
 	}
 
-	outStr, err = shell.Exec(c.command, finalArgs...)
+	outStr, err = c.shell.Exec(c.command, finalArgs...)
 	return
 }

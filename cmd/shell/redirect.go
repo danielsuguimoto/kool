@@ -26,6 +26,7 @@ type DefaultParsedRedirect struct {
 	args        []string
 	in          io.ReadCloser
 	out         io.WriteCloser
+	err         io.WriteCloser
 	closeStdin  bool
 	closeStdout bool
 }
@@ -50,19 +51,19 @@ func (p *DefaultParsedRedirect) CreateCommand(executable string) (cmd *exec.Cmd)
 	cmd = exec.Command(executable, p.args...)
 	cmd.Env = os.Environ()
 	cmd.Stdout = p.out
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = p.err
 	cmd.Stdin = p.in
 	return
 }
 
-func parseRedirects(originalArgs []string) (parsed *DefaultParsedRedirect, err error) {
+func parseRedirects(shell Shell, originalArgs []string) (parsed *DefaultParsedRedirect, err error) {
 	var (
 		numArgs int
 		inFile  io.ReadCloser
 		outFile io.WriteCloser
 	)
 
-	parsed = &DefaultParsedRedirect{originalArgs, os.Stdin, os.Stdout, false, false}
+	parsed = &DefaultParsedRedirect{originalArgs, shell.In(), shell.Out(), shell.Err(), false, false}
 
 	if numArgs = len(parsed.args); numArgs < 2 {
 		return
