@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
+	"sync"
 
 	"github.com/gookit/color"
 )
@@ -35,6 +36,7 @@ type DefaultShell struct {
 	errStream io.Writer
 	lookedUp  map[string]error
 	env       environment.EnvStorage
+	mutex     sync.RWMutex
 }
 
 // Shell implements functions for handling a shell
@@ -61,6 +63,7 @@ func NewShell() Shell {
 		inStream:  os.Stdin,
 		outStream: os.Stdout,
 		errStream: os.Stderr,
+		lookedUp:  make(map[string]error),
 		env:       environment.NewEnvStorage(),
 	}
 }
@@ -194,11 +197,11 @@ func (s *DefaultShell) LookPath(command builder.Command) (err error) {
 		hasLooked bool
 	)
 
-	if s.lookedUp == nil {
-		s.lookedUp = make(map[string]error)
-	}
+	s.mutex.RLock()
+	err, hasLooked = s.lookedUp[exe]
+	s.mutex.RUnlock()
 
-	if err, hasLooked = s.lookedUp[exe]; err != nil {
+	if err != nil {
 		return
 	}
 
@@ -206,6 +209,8 @@ func (s *DefaultShell) LookPath(command builder.Command) (err error) {
 		// non-absolute/relative path... let's look it up on PATH
 		_, err = execLookPathFn(exe)
 
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
 		s.lookedUp[exe] = err
 	}
 

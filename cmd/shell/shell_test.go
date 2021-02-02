@@ -110,6 +110,7 @@ func TestExecDockerComposeDefaultShell(t *testing.T) {
 		inStream:  os.Stdin,
 		outStream: ioutil.Discard,
 		errStream: os.Stderr,
+		lookedUp:  make(map[string]error),
 		env:       environment.NewFakeEnvStorage(),
 	}
 
@@ -189,6 +190,7 @@ func TestInteractiveDockerComposeDefaultShell(t *testing.T) {
 		inStream:  os.Stdin,
 		outStream: ioutil.Discard,
 		errStream: os.Stderr,
+		lookedUp:  make(map[string]error),
 		env:       environment.NewFakeEnvStorage(),
 	}
 
