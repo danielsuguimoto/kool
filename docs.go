@@ -96,6 +96,7 @@ func main() {
 	}
 
 	shell.Success("Success!")
+	shell.Success("xablau!")
 }
 
 // CreateFile Create file to write markdown content
