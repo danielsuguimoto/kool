@@ -21,6 +21,23 @@ fi
 
 export BUILD_VERSION=$REPLY
 
-exec bash build_artifacts.sh
+bash build_artifacts.sh
 
-# TODO: create new tag / draft a new release with github CLI
+if command -v gh &> /dev/null
+then
+  read -p "You are going to upload all artifacts to release $BUILD_VERSION. Continue? (y/N) "
+  if [[ ! $REPLY =~ ^(yes|YES|y|Y)$ ]]
+  then
+    exit
+  fi
+
+  ARTIFACTS=""
+  for artifact in dist/*
+  do
+    ARTIFACTS="$ARTIFACTS $artifact"
+  done
+
+  ARTIFACTS=`echo $ARTIFACTS | sed 's/ *$//g'`
+
+  gh release upload $BUILD_VERSION $ARTIFACTS
+fi
